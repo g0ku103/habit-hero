@@ -125,8 +125,8 @@ Frontend Runs at : http://localhost:3000
 
 👤 Author
 
-##Gokul S Babu
-###Full Stack / AI Enthusiast
+## Gokul S Babu
+### Full Stack / AI Enthusiast
 
 
 
