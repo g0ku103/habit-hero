@@ -95,48 +95,38 @@ uvicorn main:app --reload
 
 ---
 
-## 🎨 Frontend Documentation
+Fronte End Setup
 
-The frontend of **Habit Hero** is built using React.js with a focus on clean UI, responsiveness, and intuitive user interactions.
+cd frontend
+npm install
+npm start
 
----
+Frontend Runs at : http://localhost:3000
 
-## 🧩 Frontend Features Breakdown
+```
 
-### 🏠 Dashboard
-- Hero banner with visual branding
-- Overall success rate & longest streak cards
-- Category-wise filtering
-- Line chart for completion trends
-- Bar chart for category performance
-- GitHub-style habit completion heatmap (placed at bottom)
+## API Endpoints (Summary)
 
-### 📋 Habit List
-- View habits based on selected date
-- Mark habits as completed (disabled once done)
-- Add optional notes while completing habits
-- Visual state change on completion (color + button state)
-- Delete habits with confirmation
-- Fetch motivation per habit
+### Habits
+- GET /habits/?selected_date=YYYY-MM-DD
+- POST /habits/
+- DELETE /habits/{habit_id}
 
-### ➕ Add Habit
-- Minimal, aesthetic form
-- Custom category support
-- Duplicate habit prevention
-- Start-date selection
+### Progress
+- POST /progress/
 
-### 🤖 AI Suggestions
-- Category-based habit suggestions
-- One-click habit addition from suggestions
+### Analytics
+- GET /analytics/dashboard
+- GET /analytics/heatmap
 
----
+###AI
+- POST /ai/suggest-habits
+- GET /ai/motivation/{habit_id}
 
-## 🧠 Mood & Motivation Flow (Frontend)
+👤 Author
 
-1. User adds **notes** while marking a habit as completed
-2. Notes are sent to backend via `/progress/`
-3. Backend detects mood using rule-based NLP
-4. On clicking **“Get Motivation”**, frontend calls:
+##Gokul S Babu
+###Full Stack / AI Enthusiast
 
 
 
