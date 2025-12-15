@@ -36,3 +36,19 @@ export const createProgress = async (progressData) => {
   }
   return response.json();
 };
+
+export const fetchAISuggestions = async (targetCategory = null) => {
+  const response = await fetch(`${API_BASE_URL}/ai/suggest-habits`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ target_category: targetCategory, num_suggestions: 5 })
+  });
+  if (!response.ok) throw new Error('Failed to fetch suggestions');
+  return response.json();
+};
+
+export const fetchMotivation = async (habitId) => {
+  const response = await fetch(`${API_BASE_URL}/ai/motivation/${habitId}`);
+  if (!response.ok) throw new Error('Failed to fetch motivation');
+  return response.json();
+};
