@@ -94,25 +94,40 @@ Project Structure
 habit-hero/
 │
 ├── backend/
+
 │   ├── main.py
+
 │   ├── ai_logic.py
+
 │   ├── models.py
+
 │   ├── schemas.py
+
 │   └── database.py
 │
 |
 |
 |
 ├── frontend/
+
 │   ├── src/
+
 │   │   ├── components/
+
 │   │   │   ├── HabitList.jsx
+
 │   │   │   ├── HabitForm.jsx
+
 │   │   │   ├── HabitHeatmap.jsx
+
 │   │   │   └── Dashboard.jsx
+
 │   │   ├── api.js
+
 │   │   └── App.js
+
 │
+
 └── README.md
 
 Backend Setup
