@@ -123,10 +123,9 @@ Frontend Runs at : http://localhost:3000
 - POST /ai/suggest-habits
 - GET /ai/motivation/{habit_id}
 
-👤 Author
-
-## Gokul S Babu
-### Full Stack / AI Enthusiast
+# # 👤 Author
+### Gokul S Babu
+#### Full Stack / AI Enthusiast
 
 
 
