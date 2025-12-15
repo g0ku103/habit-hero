@@ -100,6 +100,9 @@ habit-hero/
 │   ├── schemas.py
 │   └── database.py
 │
+|
+|
+|
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
