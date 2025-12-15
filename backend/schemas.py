@@ -42,3 +42,16 @@ class ProgressResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class HabitWithStatsResponse(BaseModel):
+    id: int
+    name: str
+    frequency: str
+    category: str
+    start_date: date
+    current_streak: int
+    success_rate: float
+    completed_today: bool
+
+    class Config:
+        from_attributes = True

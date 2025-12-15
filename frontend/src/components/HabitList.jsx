@@ -1,17 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { fetchHabits, createProgress } from '../api';
 import { toast } from 'react-toastify';
+import {
+  fetchHabits,
+  createProgress,
+  deleteHabit,
+  fetchMotivation
+} from '../api';
 
 const HabitList = ({ onProgressLogged }) => {
   const [habits, setHabits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split('T')[0]
+  );
+
+  // Notes & motivation per habit
+  const [notes, setNotes] = useState({});
+  const [motivation, setMotivation] = useState({});
 
   const loadHabits = async () => {
     setLoading(true);
     try {
-      const data = await fetchHabits();
+      const data = await fetchHabits(selectedDate);
       setHabits(data);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load habits');
     }
     setLoading(false);
@@ -19,93 +31,177 @@ const HabitList = ({ onProgressLogged }) => {
 
   useEffect(() => {
     loadHabits();
-  }, []);
+  }, [selectedDate]);
 
-  const handleCheckIn = async (habitId, notes = '') => {
+  const handleDone = async (habitId) => {
     try {
       await createProgress({
         habit_id: habitId,
         completed: 1,
-        notes: notes.trim()
+        notes: notes[habitId] || ''
       });
-      toast.success('Progress logged! Keep going! 💪');
-      loadHabits(); // Refresh list
-      if (onProgressLogged) onProgressLogged(); // Refresh dashboard
+
+      toast.success('Marked as done!');
+      setNotes(prev => ({ ...prev, [habitId]: '' }));
+      loadHabits();
+      if (onProgressLogged) onProgressLogged();
     } catch (err) {
-      toast.error(err.message || 'Already logged today or error');
+      toast.error(err.message || 'Already completed');
     }
   };
 
-  const [notesOpen, setNotesOpen] = useState(null); // Which habit has notes open
-  const [currentNotes, setCurrentNotes] = useState('');
+  // ✅ FIX IS HERE
+  const handleMotivation = async (habitId) => {
+    try {
+      const data = await fetchMotivation(habitId);
 
-  if (loading) return <p style={{ textAlign: 'center', padding: '50px' }}>Loading habits...</p>;
+      // Store motivation DIRECTLY
+      setMotivation(prev => ({
+        ...prev,
+        [habitId]: data
+      }));
+    } catch {
+      toast.error('Failed to load motivation');
+    }
+  };
 
-  if (habits.length === 0) {
-    return <p style={{ textAlign: 'center', padding: '50px' }}>No habits yet. Add one!</p>;
+  const handleDelete = async (habitId) => {
+    if (!window.confirm('Delete this habit permanently?')) return;
+    try {
+      await deleteHabit(habitId);
+      toast.success('Habit deleted');
+      loadHabits();
+    } catch {
+      toast.error('Delete failed');
+    }
+  };
+
+  if (loading) {
+    return <p style={{ textAlign: 'center', padding: 40 }}>Loading…</p>;
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '40px' }}>My Habits</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
+    <div style={{ padding: 40, maxWidth: 1400, margin: '0 auto' }}>
+      <h2 style={{ textAlign: 'center' }}>My Habits</h2>
+
+      {/* Date Filter */}
+      <div style={{ textAlign: 'center', marginBottom: 30 }}>
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+        />
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: 30
+        }}
+      >
         {habits.map(habit => (
-          <div key={habit.id} style={{
-            background: 'white',
-            padding: '30px',
-            borderRadius: '16px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-            textAlign: 'center'
-          }}>
-            <h3 style={{ margin: '0 0 10px', fontSize: '1.4em' }}>{habit.name}</h3>
-            <p style={{ color: '#666', marginBottom: '20px' }}>Category: <strong>{habit.category}</strong></p>
+          <div
+            key={habit.id}
+            style={{
+              padding: 30,
+              borderRadius: 20,
+              background: habit.completed_today
+                ? 'linear-gradient(135deg,#ecfdf5,#fff)'
+                : '#fff',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.12)'
+            }}
+          >
+            <h3>{habit.name}</h3>
+            <p>Category · {habit.category}</p>
+            <p>🔥 Streak: <b>{habit.current_streak}</b></p>
+            <p>📈 Success: <b>{habit.success_rate}%</b></p>
 
-            {/* Placeholder for streak & rate – we'll enhance later */}
-            <p>Current Streak: <strong>Calculating...</strong></p>
-            <p>Success Rate: <strong>Calculating...</strong></p>
+            {/* Notes */}
+            {!habit.completed_today && (
+              <textarea
+                placeholder="How did it feel today? (optional)"
+                value={notes[habit.id] || ''}
+                onChange={(e) =>
+                  setNotes(prev => ({
+                    ...prev,
+                    [habit.id]: e.target.value
+                  }))
+                }
+                style={{
+                  width: '100%',
+                  padding: 10,
+                  borderRadius: 10,
+                  marginTop: 10
+                }}
+              />
+            )}
 
+            {/* Mark Done */}
             <button
-              onClick={() => setNotesOpen(habit.id)}
+              disabled={habit.completed_today}
+              onClick={() => handleDone(habit.id)}
               style={{
                 width: '100%',
-                padding: '14px',
-                background: '#4BC0C0',
-                color: 'white',
+                marginTop: 15,
+                padding: 14,
+                borderRadius: 12,
                 border: 'none',
-                borderRadius: '8px',
-                fontSize: '1.1em',
-                marginTop: '20px',
+                fontWeight: 600,
+                background: habit.completed_today ? '#22c55e' : '#4BC0C0',
+                color: 'white',
+                cursor: habit.completed_today ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {habit.completed_today ? 'Completed ✔' : 'Mark Done'}
+            </button>
+
+            {/* Motivation */}
+            <button
+              onClick={() => handleMotivation(habit.id)}
+              style={{
+                width: '100%',
+                marginTop: 10,
+                padding: 12,
+                borderRadius: 12,
+                border: '1px solid #e5e7eb',
+                background: '#f8fafc',
                 cursor: 'pointer'
               }}
             >
-              Mark Done Today
+              Get Motivation
             </button>
 
-            {notesOpen === habit.id && (
-              <div style={{ marginTop: '20px' }}>
-                <textarea
-                  placeholder="How did it go? (optional)"
-                  value={currentNotes}
-                  onChange={(e) => setCurrentNotes(e.target.value)}
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ccc', height: '80px' }}
-                />
-                <div style={{ marginTop: '10px' }}>
-                  <button onClick={() => {
-                    handleCheckIn(habit.id, currentNotes);
-                    setNotesOpen(null);
-                    setCurrentNotes('');
-                  }} style={{ background: '#36A2EB', padding: '10px 20px', color: 'white', border: 'none', borderRadius: '6px', marginRight: '10px' }}>
-                    Submit
-                  </button>
-                  <button onClick={() => {
-                    setNotesOpen(null);
-                    setCurrentNotes('');
-                  }} style={{ background: '#ccc', padding: '10px 20px', color: 'black', border: 'none', borderRadius: '6px' }}>
-                    Cancel
-                  </button>
-                </div>
+            {motivation[habit.id]?.quote && (
+              <div
+                style={{
+                  marginTop: 15,
+                  padding: 15,
+                  borderRadius: 12,
+                  background: '#f1f5f9',
+                  fontSize: '0.95rem'
+                }}
+              >
+                <p><b>{motivation[habit.id].quote}</b></p>
+                <small>{motivation[habit.id].context}</small>
               </div>
             )}
+
+            {/* Delete */}
+            <button
+              onClick={() => handleDelete(habit.id)}
+              style={{
+                width: '100%',
+                marginTop: 10,
+                padding: 12,
+                borderRadius: 12,
+                border: '1px solid #ef4444',
+                background: '#fff',
+                color: '#ef4444'
+              }}
+            >
+              Delete Habit
+            </button>
           </div>
         ))}
       </div>

@@ -8,11 +8,35 @@ export const fetchDashboardAnalytics = async () => {
   return response.json();
 };
 
-export const fetchHabits = async () => {
-  const response = await fetch(`${API_BASE_URL}/habits/`);
+export const fetchHabits = async (selectedDate) => {
+  const response = await fetch(
+    `${API_BASE_URL}/habits/?selected_date=${selectedDate}`
+  );
   if (!response.ok) throw new Error('Failed to fetch habits');
   return response.json();
 };
+
+export const deleteHabit = async (habitId) => {
+  const response = await fetch(
+    `${API_BASE_URL}/habits/${habitId}`,
+    { method: 'DELETE' }
+  );
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.detail || 'Failed to delete habit');
+  }
+
+  return response.json();
+};
+
+
+export const fetchCategories = async () => {
+  const habits = await fetchHabits(new Date().toISOString().split('T')[0]);
+  const categories = [...new Set(habits.map(h => h.category))];
+  return categories;
+};
+
 
 export const createHabit = async (habitData) => {
   const response = await fetch(`${API_BASE_URL}/habits/`, {

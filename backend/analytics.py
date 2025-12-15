@@ -71,3 +71,24 @@ def get_longest_streak(db: Session) -> int:
             max_streak = streak
     
     return max_streak
+
+def get_heatmap_data(db: Session, days: int = 90):
+    from datetime import date, timedelta
+
+    end_date = date.today()
+    start_date = end_date - timedelta(days=days)
+
+    data = {}
+    current = start_date
+
+    while current <= end_date:
+        count = db.query(Progress).filter(
+            Progress.date == current,
+            Progress.completed == 1
+        ).count()
+
+        data[current.isoformat()] = count
+        current += timedelta(days=1)
+
+    return data
+
