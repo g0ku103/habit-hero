@@ -133,22 +133,26 @@ habit-hero/
 Backend Setup
 
 cd backend
+
 python -m venv venv
+
 venv\Scripts\activate
+
 pip install -r requirements.txt
+
 uvicorn main:app --reload
 
-Backend Runs at: 
-http://127.0.0.1:8000
+Backend Runs at:       http://127.0.0.1:8000
 
 Frontend Setup
 
 cd frontend
+
 npm install
+
 npm start
 
-Frontend runs at: 
-http://localhost:3000
+Frontend runs at:    http://localhost:3000
 
 🔌 API Endpoints (Summary)
 Habits
@@ -214,6 +218,4 @@ Helps visualize long-term consistency
 
 👤 Author
 
-Gokul S Babu
-Full Stack / AI Enthusiast
-Project built as part of a technical hiring assignment.
+Gokul S Babu | Full Stack / AI Enthusiast |Project built as part of a technical hiring assignment.
